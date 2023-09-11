@@ -16,4 +16,4 @@ python create_animation.py
 
 
 
-![Simulation](./snapshot.png)
+![Simulation](./snapshot.gif)
