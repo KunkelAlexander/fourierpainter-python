@@ -33,64 +33,6 @@ lws         = [0.5, 0.7, 1.0, 1.5, 2, 4, 8, 16]
 alphas      = [1.0, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
 plot_colour = '#08F7FE'
 
-
-# craw an elephant using four complex parameters 
-
-"""
-Author: Piotr A. Zolnierczuk (zolnierczukp at ornl dot gov)
-
-Based on a paper by:
-Drawing an elephant with four complex parameters
-Jurgen Mayer, Khaled Khairy, and Jonathon Howard,
-Am. J. Phys. 78, 648 (2010), DOI:10.1119/1.3254017
-"""
-
-# elephant parameters
-p1, p2, p3, p4 = (50 - 30j, 18 +  8j, 12 - 10j, -14 - 60j )
-p5 = 40 + 20j # eyepiece
-
-def fourier(t, C):
-    f = np.zeros(t.shape)
-    A, B = C.real, C.imag
-    for k in range(len(C)):
-        f = f + A[k]*np.cos(k*t) + B[k]*np.sin(k*t)
-    return f
-
-def elephant(t, p1, p2, p3, p4, p5):
-    npar = 6
-    Cx = np.zeros((npar,), dtype='complex')
-    Cy = np.zeros((npar,), dtype='complex')
-
-    Cx[1] = p1.real*1j
-    Cx[2] = p2.real*1j
-    Cx[3] = p3.real
-    Cx[5] = p4.real
-
-    Cy[1] = p4.imag + p1.imag*1j
-    Cy[2] = p2.imag*1j
-    Cy[3] = p3.imag*1j
-
-    x = fourier(t,Cx)
-    y = fourier(t,Cy)
-
-
-    return x,y
-
-L      = 1 
-
-t = np.linspace(0, L, N+1)
-
-# compute time-series data for elephant 
-x, y = elephant(t * 2 * np.pi, p1, p2, p3, p4, p5)
-
-# normalise to [-1,1]x[-1,1]
-x /= 100 
-y /= 100
-f = -x + 1j * y 
-
-# compute Fourier transform excluding f[-1] == f[0]
-fHat = np.fft.fftn(f[:-1])
-
 # set up figure
 figsize = (4, 4)
 xlim    = (-1, 1) 
@@ -124,6 +66,25 @@ lines_inset   = []
 circles_inset = []
 arrows_inset  = []
 
+# set up input data
+# based on paper "Drawing an elephant with four complex parameters"
+# by Jürgen Mayer et al. (2010) DOI:10.1119/1.3254017
+
+def elephant(t):
+    y =  50*np.sin(t)+18*np.sin(2*t)-12*np.cos(3*t)+14*np.cos(5*t)
+    x = -60*np.cos(t)+30*np.sin(t)  - 8*np.sin(2*t)+10*np.sin(3*t)
+    return x/100 + 1j*y/100
+
+# number of points at which to sample elephant
+N     = 128
+times = np.linspace(0, 2 * np.pi, N+1)
+
+# compute time-series data for elephant
+f = elephant(times)
+
+# compute Fourier transform excluding f[-1] == f[0]
+fHat = np.fft.fft(f[:-1])
+
 # plot elephant 
 for lw, alpha in zip(lws, alphas): 
     line,        = ax.plot([],[], lw = lw, c = plot_colour,  alpha = alpha)
@@ -135,9 +96,9 @@ for lw, alpha in zip(lws, alphas):
 
 # plot arrows and circles
 for i in range(N): 
-    arrow       = ax.arrow(0, 0, 0, 0, lw=0.1)
+    arrow  = ax.arrow(0, 0, 0, 0, lw = 0.1, head_width=0.01, head_length=0.02, length_includes_head=True)
     arrows.append(arrow) 
-    circle       = plt.Circle((0,0), 0, fill = False, lw=0.2, alpha=0.8)
+    circle = plt.Circle((0,0), 0, fill = False, lw=0.2, alpha=0.8)
     circles.append(circle)
 
     if enable_inset:
@@ -164,33 +125,33 @@ def init():
     return [*lines, *circles, *arrows, *lines_inset, *circles_inset, *arrows_inset] 
 
 # animation function
-def animate(time):
+def animate(t):
 
-    # plot elephant up to time
-    fDrawn = f[:time+1]
+    # plot elephant up to t
+    fDrawn = f[:t+1]
 
     for line in lines:
-        line.set_data(np.imag(fDrawn), np.real(fDrawn))
+        line.set_data(np.real(fDrawn), np.imag(fDrawn))
 
     if enable_inset:
         for line in lines_inset:
-            line.set_data(np.imag(fDrawn), np.real(fDrawn))
+            line.set_data(np.real(fDrawn), np.imag(fDrawn))
 
-    # zoom centered on last arrow drawn
-    arrowPosition = fDrawn[-1]
-    x, y = np.imag(arrowPosition), np.real(arrowPosition)
-    ax_inset.set_xlim([x - width /2, x + width /2])
-    ax_inset.set_ylim([y - height/2, y + height/2])
+        # zoom centered on last arrow drawn
+        arrowPosition = fDrawn[-1]
+        x, y = np.real(arrowPosition), np.imag(arrowPosition)
+        ax_inset.set_xlim([x - width /2, x + width /2])
+        ax_inset.set_ylim([y - height/2, y + height/2])
 
 
     x = 0
     y = 0 
 
     # build list of complex vectors
-    indices = np.arange(N)
+    k = np.arange(N)
 
     # plane waves with coefficient determined by FFT of input data 
-    waves   = fHat * np.exp(1j * 2 * np.pi * time * indices/N) / len(fHat)
+    waves   = fHat * np.exp(1j * 2 * np.pi * t * k/N) / len(fHat)
     # returns frequencies corresponding to entries of fHat
     # 0, 1, 2, ..., N/2, -N/2 - 1, ..., -1
     freqs   = np.fft.fftfreq(N)
@@ -198,8 +159,8 @@ def animate(time):
     waves   = waves[np.argsort(np.abs(freqs))]
 
     for i in range(N):
-        dx = np.imag(waves[i])
-        dy = np.real(waves[i])
+        dx = np.real(waves[i])
+        dy = np.imag(waves[i])
 
         arrows[i].set_data(x = x, y = y, dx = dx, dy = dy)
         circles[i].center = (x,y)
