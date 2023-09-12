@@ -29,9 +29,9 @@ enable_inset = (zoom != 1)
 plt.style.use('dark_background')
 
 # create glowing line effect 
-lws         = [0.5, 0.7, 1.0, 1.5, 2, 4, 8, 16]
-alphas      = [1.0, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
-plot_colour = '#08F7FE'
+linewidths     = np.logspace(-5, 5, 20, base=2)
+transparencies = np.linspace(1, 0, 20)
+plot_colour    = '#08F7FE'
 
 # set up figure
 figsize = (4, 4)
@@ -86,7 +86,7 @@ f = elephant(times)
 fHat = np.fft.fft(f[:-1])
 
 # plot elephant 
-for lw, alpha in zip(lws, alphas): 
+for lw, alpha in zip(linewidths, transparencies):
     line,        = ax.plot([],[], lw = lw, c = plot_colour,  alpha = alpha)
     lines.append(line)
     

@@ -35,10 +35,15 @@ waves   = waves[np.argsort(np.abs(freqs))]
 fig, ax = plt.subplots(dpi=600)
 plt.axis("off") 
 plt.style.use('dark_background')
-plot_colour = '#08F7FE'
 
-# plot elephant 
-plt.plot(np.real(f[:t+1]), np.imag(f[:t+1]), c=plot_colour)
+# plot elephant in neon-look 
+# credit to Dominic Heitz at TowardsDataScience
+linewidths     = np.logspace(-5, 5, 20, base=2)
+transparencies = np.linspace(1, 0, 20)
+for lw, alpha in zip(linewidths, transparencies):
+    plt.plot(np.real(f[:t+1]), np.imag(f[:t+1]), \
+             lw=lw, alpha=alpha, c='#08F7FE')
+    
 # first vector starts at origin
 x = 0
 y = 0
