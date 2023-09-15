@@ -73,11 +73,11 @@ arrows_inset  = []
 def elephant(t):
     y =  50*np.sin(t)+18*np.sin(2*t)-12*np.cos(3*t)+14*np.cos(5*t)
     x = -60*np.cos(t)+30*np.sin(t)  - 8*np.sin(2*t)+10*np.sin(3*t)
-    return x/100 + 1j*y/100
+    return x/90 + 1j*y/90
 
 # number of points at which to sample elephant
 N     = 128
-times = np.linspace(0, 2 * np.pi, N+1)
+times = np.linspace(0, 2*np.pi, N+1)
 
 # compute time-series data for elephant
 f = elephant(times)

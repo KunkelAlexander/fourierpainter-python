@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 def elephant(t):
     y =  50*np.sin(t)+18*np.sin(2*t)-12*np.cos(3*t)+14*np.cos(5*t)
     x = -60*np.cos(t)+30*np.sin(t)  - 8*np.sin(2*t)+10*np.sin(3*t)
-    return x/100 + 1j*y/100
+    return x/90 + 1j*y/90
 
 # number of points at which to sample elephant
 N     = 128
-times = np.linspace(0, 2 * np.pi, N+1)
+times = np.linspace(0, 2*np.pi, N+1)
 
 # compute time-series data for elephant
 f = elephant(times)
@@ -32,9 +32,11 @@ freqs   = np.fft.fftfreq(N)
 waves   = waves[np.argsort(np.abs(freqs))]
 
 # create figure
-fig, ax = plt.subplots(dpi=600)
+fig, ax = plt.subplots(figsize=(4,4), dpi=600)
 plt.axis("off") 
 plt.style.use('dark_background')
+plt.xlim(-1, 1)
+plt.ylim(-1, 1)
 
 # plot elephant in neon-look 
 # credit to Dominic Heitz at TowardsDataScience
